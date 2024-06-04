@@ -59,3 +59,7 @@ target_link_libraries(LinkTest sx128x_linux_driver)
 add_executable(Old_Test LinkTest_Proto.cpp)
 target_link_libraries(Old_Test sx128x_linux_driver)
 
+# Build the unit tests
+add_executable(Chip_ID Chip_ID.cpp)
+target_link_libraries(Chip_ID sx128x_linux_driver)
+
