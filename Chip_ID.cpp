@@ -35,7 +35,6 @@ int main(int argc, char **argv)
 	if (argc != 1)
 	{
 		printf("Usage: Chip_ID\n");
-		return 1;
 	}
 
 // Pins assignment
