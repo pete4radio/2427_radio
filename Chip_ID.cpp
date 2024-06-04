@@ -15,6 +15,10 @@
 	You should have received a copy of the GNU Lesser General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+/* if the CS and SPI and radio are working, should be able to recover the Chip ID on the SX1280.
+   Check wiring, power, pin definitions, and check that SPI is enabled in raspi-config
+*/
+
 
 #include "SX128x_Linux.hpp"
 #include "pins.hpp"
@@ -40,7 +44,7 @@ int main(int argc, char **argv)
 	// Assume we're running on a high-end Raspberry Pi,
 	// so we set the SPI clock speed to the maximum value supported by the chip
 	Radio.SetSpiSpeed(8000000);
-    std::cout << "Firmware Version: " << Radio.GetFirmwareVersion() << "\n";
-	if (Radio.GetFirmwareVersion() != 43447) {std::cout << "Unexpected Chip ID.";}
+    std::cout << "Chip_ID: " << Radio.GetFirmwareVersion() << "\n";
+	if (Radio.GetFirmwareVersion() != 43447) {std::cout << "Unexpected Chip ID.  Expected 43447 for Chip ID"; exit(-1);}
 	exit(EXIT_SUCCESS);
 }
