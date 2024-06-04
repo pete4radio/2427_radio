@@ -40,8 +40,8 @@ add_executable(Lora_tx Lora_tx.cpp)
 target_link_libraries(Lora_tx sx128x_linux_driver)
 
 # Build packet tx file
-#add_executable(Lora_tx_packets Lora_tx_packets.cpp)
-#target_link_libraries(Lora_tx_packets sx128x_linux_driver)
+add_executable(Lora_tx_packets Lora_tx_packets.cpp)
+target_link_libraries(Lora_tx_packets sx128x_linux_driver)
 
 # Build rx file
 add_executable(Lora_rx Lora_rx.cpp)
