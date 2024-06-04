@@ -1,0 +1,276 @@
+/*
+    This file is part of SX128x Linux driver.
+    Copyright (C) 2020 ReimuNotMoe
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#include "SX128x_Linux.hpp"
+
+#include <cstdio>
+#include <cstring>
+
+#include "pins.hpp"
+
+int main(int argc, char **argv) {
+	auto BW = strtol(argv[3], nullptr, 10);
+	SX128x::RadioLoRaBandwidths_t BW_Reg;
+	auto SF = strtol(argv[4], nullptr, 10);	
+	SX128x::RadioLoRaSpreadingFactors_t SF_Reg;
+	auto CR = strtol(argv[5], nullptr, 10);
+	SX128x::RadioLoRaCodingRates_t CR_Reg;
+	auto freq = strtol(argv[6], nullptr, 10);
+
+	if ((argc != 7) || ((BW != 1600) && (BW != 800) & (BW != 400) && (BW != 200)) || 
+		(SF < 5) || (SF > 12) || (CR < 5) || (CR > 7) || (freq < 2400) || (freq > 2420))
+	
+	{
+		printf("Usage: LinkTest <rx|tx> <lora|flrc> <BW [1600|800|400|200]> <SF [5:12]> <CR [5:8]> <freq MHz>\n");
+		std::cout << "Version 2 with TCXO_EN\n";
+		std::cout <<
+	"typedef enum {\n"
+	"	LORA_BW_0200 = 0x34,\n"
+	"	LORA_BW_0400 = 0x26,\n"
+	"	LORA_BW_0800 = 0x18,\n"
+	"	LORA_BW_1600 = 0x0A,\n"
+	"} RadioLoRaBandwidths_t;\n\n"
+
+
+	"typedef enum {\n"
+	"	LORA_SF5 = 0x50,\n"
+	"	LORA_SF6 = 0x60,\n"
+	"	LORA_SF7 = 0x70,\n"
+	"	LORA_SF8 = 0x80,\n"
+	"	LORA_SF9 = 0x90,\n"
+	"	LORA_SF10 = 0xA0,\n"
+	"	LORA_SF11 = 0xB0,\n"
+	"	LORA_SF12 = 0xC0,\n"
+	"} RadioLoRaSpreadingFactors_t;\n\n"
+
+
+	"typedef enum {\n"
+	"	LORA_CR_4_5 = 0x01,\n"
+	"	LORA_CR_4_6 = 0x02,\n"
+	"	LORA_CR_4_7 = 0x03,\n"
+	"	LORA_CR_4_8 = 0x04,\n"
+	"	LORA_CR_LI_4_5 = 0x05,\n"
+	"	LORA_CR_LI_4_6 = 0x06,\n"
+	"	LORA_CR_LI_4_7 = 0x07,\n"
+	"} RadioLoRaCodingRates_t;\n";	
+
+		return 1;
+	};
+
+	if (BW == 1600) BW_Reg = SX128x::LORA_BW_1600;
+	if (BW == 800) BW_Reg = SX128x::LORA_BW_0800;
+	if (BW == 400) BW_Reg = SX128x::LORA_BW_0400;
+	if (BW == 200) BW_Reg = SX128x::LORA_BW_0200;
+
+	if (SF == 5) SF_Reg = SX128x::LORA_SF5;
+	if (SF == 6) SF_Reg = SX128x::LORA_SF6;
+	if (SF == 7) SF_Reg = SX128x::LORA_SF7;
+	if (SF == 8) SF_Reg = SX128x::LORA_SF8;
+	if (SF == 9) SF_Reg = SX128x::LORA_SF9;
+	if (SF == 10) SF_Reg = SX128x::LORA_SF10;
+	if (SF == 11) SF_Reg = SX128x::LORA_SF11;
+	if (SF == 12) SF_Reg = SX128x::LORA_SF12;
+
+	if (CR == 5) CR_Reg = SX128x::LORA_CR_4_5;
+	if (CR == 6) CR_Reg = SX128x::LORA_CR_4_6;
+	if (CR == 7) CR_Reg = SX128x::LORA_CR_4_7;
+	if (CR == 8) CR_Reg = SX128x::LORA_CR_4_8;
+
+	int modmode = 0;
+
+	if (strcmp(argv[2], "flrc") == 0) {
+		modmode = 1;
+	}
+
+// Pins assignment
+	SX128x_Linux Radio("/dev/spidev0.0", 0, Hunter_pins);
+
+	// Assume we're running on a high-end Raspberry Pi,
+	// so we set the SPI clock speed to the maximum value supported by the chip
+	Radio.SetSpiSpeed(8000000);
+
+	Radio.Init();
+	puts("Init done");
+	Radio.SetStandby(SX128x::STDBY_XOSC);
+	puts("SetStandby done");
+	Radio.SetRegulatorMode(static_cast<SX128x::RadioRegulatorModes_t>(0));
+	puts("SetRegulatorMode done");
+	Radio.SetLNAGainSetting(SX128x::LNA_HIGH_SENSITIVITY_MODE);
+	puts("SetLNAGainSetting done");
+	Radio.SetTxParams(0, SX128x::RADIO_RAMP_20_US);
+	puts("SetTxParams done");
+
+	Radio.SetBufferBaseAddresses(0x00, 0x00);
+	puts("SetBufferBaseAddresses done");
+
+
+	SX128x::ModulationParams_t ModulationParams;
+	SX128x::PacketParams_t PacketParams;
+
+	if (modmode == 0) {
+		ModulationParams.PacketType = SX128x::PACKET_TYPE_LORA;
+
+		ModulationParams.Params.LoRa.Bandwidth = BW_Reg;
+		std::cout << "Set BW Register 0x" << std::hex << ModulationParams.Params.LoRa.Bandwidth << "\n";
+		ModulationParams.Params.LoRa.SpreadingFactor = SF_Reg;
+		std::cout << "Set SF Register 0x" << std::hex << ModulationParams.Params.LoRa.SpreadingFactor << "\n";
+		ModulationParams.Params.LoRa.CodingRate = CR_Reg;
+		std::cout << "Set CR Register 0x" << std::hex << ModulationParams.Params.LoRa.CodingRate << "\n";
+
+		PacketParams.PacketType = SX128x::PACKET_TYPE_LORA;
+		auto &l = PacketParams.Params.LoRa;
+		l.PayloadLength = 253;
+		l.HeaderType = SX128x::LORA_PACKET_FIXED_LENGTH;
+		l.PreambleLength = 12;
+		l.Crc = SX128x::LORA_CRC_ON;
+		l.InvertIQ = SX128x::LORA_IQ_NORMAL;
+
+		Radio.SetPacketType(SX128x::PACKET_TYPE_LORA);
+	} else {
+		ModulationParams.PacketType = SX128x::PACKET_TYPE_FLRC;
+		auto &p = ModulationParams.Params.Flrc;
+		p.CodingRate = SX128x::FLRC_CR_1_2;
+		p.BitrateBandwidth = SX128x::FLRC_BR_0_325_BW_0_3;
+		p.ModulationShaping = SX128x::RADIO_MOD_SHAPING_BT_OFF;
+
+
+		PacketParams.PacketType = SX128x::PACKET_TYPE_FLRC;
+		auto &l = PacketParams.Params.Flrc;
+		l.PayloadLength = 127;
+		l.HeaderType = SX128x::RADIO_PACKET_VARIABLE_LENGTH;
+		l.PreambleLength = SX128x::PREAMBLE_LENGTH_32_BITS;
+		l.CrcLength = SX128x::RADIO_CRC_OFF;
+		l.SyncWordLength = SX128x::FLRC_SYNCWORD_LENGTH_4_BYTE;
+		l.SyncWordMatch = SX128x::RADIO_RX_MATCH_SYNCWORD_1;
+		l.Whitening = SX128x::RADIO_WHITENING_OFF;
+
+		Radio.SetPacketType(SX128x::PACKET_TYPE_FLRC);
+	}
+
+	puts("SetPacketType done");
+	Radio.SetModulationParams(ModulationParams);
+	puts("SetModulationParams done");
+	Radio.SetPacketParams(PacketParams);
+	puts("SetPacketParams done");
+
+	//auto freq = strtol(argv[3], nullptr, 10);
+	Radio.SetRfFrequency(freq * 1000000UL);
+	puts("SetRfFrequency done");
+
+	if (modmode == 1) {
+		// only used in GFSK, FLRC (4 bytes max) and BLE mode
+		uint8_t sw[] = {0xDD, 0xA0, 0x96, 0x69, 0xDD};
+		Radio.SetSyncWord(1, sw);
+		// only used in GFSK, FLRC
+		uint8_t crcSeedLocal[2] = {0x45, 0x67};
+		Radio.SetCrcSeed(crcSeedLocal);
+		Radio.SetCrcPolynomial(0x0123);
+//		Radio.SetWhiteningSeed(0x22);
+	}
+
+	std::cout << Radio.GetFirmwareVersion() << "\n";
+
+	Radio.callbacks.txDone = []{
+		puts("Wow TX done");
+	};
+
+	size_t pkt_count = 0;
+
+	Radio.callbacks.rxDone = [&] {
+		puts("Wow RX done");
+
+
+		SX128x::PacketStatus_t ps;
+		Radio.GetPacketStatus(&ps);
+
+		uint8_t recv_buf[253];
+		uint8_t rsz;
+		Radio.GetPayload(recv_buf, &rsz, 253);
+
+		uint8_t err_count = 0;
+
+		for (size_t i=0; i<rsz; i++) {
+			uint8_t correct_value;
+			if (i % 2)
+				correct_value = 0x55;
+			else
+				correct_value = 0xaa;
+
+			if (recv_buf[i] != correct_value)
+				err_count++;
+		}
+
+//		for (size_t i=0; i<rsz; i++) {
+//			printf("%02x ", recv_buf[i]);
+//		}
+//
+//		puts("");
+
+		pkt_count++;
+		printf("Packet count: %ld\n", pkt_count);
+
+		printf("corrupted bytes: %u/%u, BER: %f%%\n", err_count, rsz, (double)err_count/rsz*100);
+
+		if (ps.packetType == SX128x::PACKET_TYPE_LORA) {
+			int8_t noise = ps.LoRa.RssiPkt - ps.LoRa.SnrPkt;
+			int8_t rscp = ps.LoRa.RssiPkt + ps.LoRa.SnrPkt;
+			printf("recvd %u bytes, RSCP: %d, RSSI: %d, Noise: %d, SNR: %d\n", rsz, rscp, ps.LoRa.RssiPkt, noise, ps.LoRa.SnrPkt);
+		} else if (ps.packetType == SX128x::PACKET_TYPE_FLRC) {
+			printf("recvd %u bytes, RSSI: %d\n", rsz, ps.Flrc.RssiSync);
+
+		}
+	};
+
+	auto IrqMask = SX128x::IRQ_RX_DONE | SX128x::IRQ_TX_DONE | SX128x::IRQ_RX_TX_TIMEOUT;
+	Radio.SetDioIrqParams(IrqMask, IrqMask, SX128x::IRQ_RADIO_NONE, SX128x::IRQ_RADIO_NONE);
+	puts("SetDioIrqParams done");
+
+	Radio.StartIrqHandler();
+	puts("StartIrqHandler done");
+
+
+	auto pkt_ToA = Radio.GetTimeOnAir();
+
+	if (strcmp(argv[1], "tx") == 0) {
+		uint8_t buf[253];
+
+		for (size_t i=0; i<sizeof(buf); i++) {
+			if (i % 2)
+				buf[i] = 0x55;
+			else
+				buf[i] = 0xaa;
+		}
+
+		while (1) {
+
+
+			Radio.SendPayload(buf, modmode == 0 ? 253 : 127, {SX128x::RADIO_TICK_SIZE_1000_US, 1000});
+			puts("SendPayload done");
+
+			usleep((pkt_ToA + 20) * 1000);
+		}
+	} else {
+		Radio.SetRx({SX128x::RADIO_TICK_SIZE_1000_US, 0xFFFF});
+		puts("SetRx done");
+
+		while (1) {
+			sleep(1);
+		}
+	}
+
+}
