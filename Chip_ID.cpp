@@ -43,7 +43,8 @@ int main(int argc, char **argv)
 	// Assume we're running on a high-end Raspberry Pi,
 	// so we set the SPI clock speed to the maximum value supported by the chip
 	Radio.SetSpiSpeed(8000000);
-    std::cout << "Chip_ID: " << Radio.GetFirmwareVersion() << "\n";
+    Radio.Init();         puts("Init done");
+	std::cout << "Chip_ID: " << Radio.GetFirmwareVersion() << "\n";
 	if (Radio.GetFirmwareVersion() != 43447) {std::cout << "Unexpected Chip ID.  Expected 43447 for Chip ID"; exit(-1);}
 	exit(EXIT_SUCCESS);
 }
