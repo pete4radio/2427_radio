@@ -63,3 +63,7 @@ target_link_libraries(Old_Test sx128x_linux_driver)
 add_executable(Chip_ID Chip_ID.cpp)
 target_link_libraries(Chip_ID sx128x_linux_driver)
 
+#Build the test executive "runner"
+add_executable(runner runner.cpp)
+target_link_libraries (runner)
+
