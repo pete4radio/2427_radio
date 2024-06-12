@@ -31,6 +31,12 @@ CPMAddPackage(
         VERSION 0.0.5
 )
 
+CPMAddPackage(
+        NAME JSON
+        GITHUB_REPOSITORY nlohmann/json
+        VERSION 3.11.3
+)
+
 add_library(sx128x_linux_driver SX128x_Linux.cpp SX128x_Linux.hpp pins.hpp)
 target_include_directories(sx128x_linux_driver PUBLIC ${sx128x_driver_SOURCE_DIR} ${GPIOPlusPlus_SOURCE_DIR} ${SPPI_SOURCE_DIR})
 target_link_libraries(sx128x_linux_driver pthread GPIOPlusPlus SPPI sx128x_driver)
@@ -67,3 +73,7 @@ target_link_libraries(Chip_ID sx128x_linux_driver)
 add_executable(runner runner.cpp)
 target_link_libraries (runner)
 
+# Build link test, which sends packets at different powers and records the histogram of received packets.
+#  It gets the modulation parameters from a json file
+add_executable(LinkTestJ LinkTestJ.cpp json.hpp)
+target_link_libraries(LinkTestJ sx128x_linux_driver nlohmann_json::nlohmann_json)
