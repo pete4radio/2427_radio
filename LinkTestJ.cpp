@@ -75,14 +75,14 @@ int main(int argc, char **argv) {
 		return 1;
 	};
 // read the LoRa Parameters from the json file provided on the command line
-    std::cout << "before file read";
+    std::cout << "before file read" << std::endl;
 	std::ifstream ir("radio.json");
-    std::cout << "after file read";
+    std::cout << "after file read" << std::endl;
 	nlohmann::json_abi_v3_11_3::json jr;
-    std::cout << "before assignment";
+    std::cout << "before assignment" << std::endl;
 	ir >> jr;
     std::cout << jr;
-	std::cout << "after assignment";
+	std::cout << "after assignment" << std::endl;
 
 	if (BW == 1600) BW_Reg = SX128x::LORA_BW_1600;
 	if (BW == 800) BW_Reg = SX128x::LORA_BW_0800;
@@ -110,13 +110,17 @@ int main(int argc, char **argv) {
 	}
 
 // Pins assignment
+	std::cout << "Before Radio" << std::endl;
+
 	SX128x_Linux Radio("/dev/spidev0.0", 0, Hunter_pins);
 
+	std::cout << "after Radio" << std::endl;
 	// Assume we're running on a high-end Raspberry Pi,
 	// so we set the SPI clock speed to the maximum value supported by the chip
 	Radio.SetSpiSpeed(8000000);
-
+	std::cout << "after SPI speed set" << std::endl;
 	Radio.Init();
+	std::cout << "after Init" << std::endl;
 	puts("Init done");
 	Radio.SetStandby(SX128x::STDBY_XOSC);
 	puts("SetStandby done");
