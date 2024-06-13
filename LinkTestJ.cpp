@@ -27,21 +27,9 @@
 
 
 int main(int argc, char **argv) {
-	auto BW = strtol(argv[3], nullptr, 10);
-	SX128x::RadioLoRaBandwidths_t BW_Reg;
-	auto SF = strtol(argv[4], nullptr, 10);	
-	SX128x::RadioLoRaSpreadingFactors_t SF_Reg;
-	auto CR = strtol(argv[5], nullptr, 10);
-	SX128x::RadioLoRaCodingRates_t CR_Reg;
-	auto freq = strtol(argv[6], nullptr, 10);
-
-	if ((argc != 7) || ((BW != 1600) && (BW != 800) & (BW != 400) && (BW != 200)) || 
-		(SF < 5) || (SF > 12) || (CR < 5) || (CR > 7) || (freq < 2400) || (freq > 2420))
-	
+	if ((argc != 2))
 	{
-		printf("Usage: LinkTest <rx|tx> <lora|flrc> <BW [1600|800|400|200]> <SF [5:12]> <CR [5:8]> <freq MHz>\n");
-		std::cout << "Version 2 with TCXO_EN\n";
-		std::cout <<
+		printf("Usage: LinkTestJ <rx|tx> \n"
 	"typedef enum {\n"
 	"	LORA_BW_0200 = 0x34,\n"
 	"	LORA_BW_0400 = 0x26,\n"
@@ -70,11 +58,11 @@ int main(int argc, char **argv) {
 	"	LORA_CR_LI_4_5 = 0x05,\n"
 	"	LORA_CR_LI_4_6 = 0x06,\n"
 	"	LORA_CR_LI_4_7 = 0x07,\n"
-	"} RadioLoRaCodingRates_t;\n";	
+	"} RadioLoRaCodingRates_t;\n");	
 
 		return 1;
 	};
-// read the LoRa Parameters from the json file provided on the command line
+// read the LoRa Parameters from the json file 
     std::cout << "before file read" << std::endl;
 	std::ifstream ir("radio.json");
     std::cout << "after file read" << std::endl;
@@ -83,6 +71,27 @@ int main(int argc, char **argv) {
 	ir >> jr;
     std::cout << jr;
 	std::cout << "after assignment" << std::endl;
+
+	const char * mode = jr["Radio"][0]["Mode"].get<std::string>().c_str();
+    std::cout << "Mode: " << mode << std::endl;
+
+	int32_t freq = jr["Radio"][1]["Freq"];
+    std::cout << "Frequency: " << freq << std::endl;
+
+	int32_t power = jr["Radio"][2]["Power"];
+    std::cout << "Transmit Power: " << power << std::endl;
+
+	int32_t BW = jr["Radio"][3]["BW"];
+    std::cout << "Bandwidth: " << BW << std::endl;
+	SX128x::RadioLoRaBandwidths_t BW_Reg;
+
+	int32_t SF = jr["Radio"][4]["SF"];
+    std::cout << "Spreading Factor: " << SF << std::endl;
+	SX128x::RadioLoRaSpreadingFactors_t SF_Reg;
+
+	int32_t CR = jr["Radio"][5]["CR"];
+    std::cout << "Coding Rate: " << CR << std::endl;
+	SX128x::RadioLoRaCodingRates_t CR_Reg;
 
 	if (BW == 1600) BW_Reg = SX128x::LORA_BW_1600;
 	if (BW == 800) BW_Reg = SX128x::LORA_BW_0800;
@@ -105,7 +114,7 @@ int main(int argc, char **argv) {
 
 	int modmode = 0;
 
-	if (strcmp(argv[2], "flrc") == 0) {
+	if (strcmp(mode, "flrc") == 0) {
 		modmode = 1;
 	}
 
