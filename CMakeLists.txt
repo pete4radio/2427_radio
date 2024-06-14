@@ -38,7 +38,13 @@ CPMAddPackage(
 )
 
 add_library(sx128x_linux_driver SX128x_Linux.cpp SX128x_Linux.hpp pins.hpp)
-target_include_directories(sx128x_linux_driver PUBLIC ${sx128x_driver_SOURCE_DIR} ${GPIOPlusPlus_SOURCE_DIR} ${SPPI_SOURCE_DIR} /usr/local/include)
+target_include_directories(sx128x_linux_driver PUBLIC 
+${sx128x_driver_SOURCE_DIR} 
+${GPIOPlusPlus_SOURCE_DIR} 
+${SPPI_SOURCE_DIR} 
+${JSON_SOURCE_DIR} 
+/home/pi/Documents/github/2427_radio/build/_deps/json-src/single_include/nlohmann
+)
 target_link_libraries(sx128x_linux_driver pthread GPIOPlusPlus SPPI sx128x_driver)
 
 # Build tx file
@@ -75,5 +81,5 @@ target_link_libraries (runner)
 
 # Build link test, which sends packets at different powers and records the histogram of received packets.
 #  It gets the modulation parameters from a json file
-add_executable(LinkTestJ LinkTestJ.cpp json.hpp)
+add_executable(LinkTestJ LinkTestJ.cpp)
 target_link_libraries(LinkTestJ sx128x_linux_driver nlohmann_json::nlohmann_json)
