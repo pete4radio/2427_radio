@@ -73,13 +73,16 @@ int main(int argc, char **argv) {
 	std::cout << "after assignment" << std::endl;
 
 	const char * mode = jr["Radio"][0]["Mode"].get<std::string>().c_str();
-    std::cout << "Mode: " << mode << std::endl;
+    std::cout << "Mode: [lora | flrc]" << mode << std::endl;
 
 	int32_t freq = jr["Radio"][1]["Freq"];
-    std::cout << "Frequency: " << freq << std::endl;
+    std::cout << "Frequency [2427 (MHz)]: " << freq << std::endl;
 
 	int32_t power = jr["Radio"][2]["Power"];
-    std::cout << "Transmit Power: " << power << std::endl;
+    std::cout << "Transmit Power [-18 to 13 (dBm)]: " << power << std::endl;
+	power = power + 18;
+	if (power >= 31) power = 31;
+	if (power <= 0) power = 0;
 
 	int32_t BW = jr["Radio"][3]["BW"];
     std::cout << "Bandwidth: " << BW << std::endl;
@@ -137,7 +140,7 @@ int main(int argc, char **argv) {
 	puts("SetRegulatorMode done");
 	Radio.SetLNAGainSetting(SX128x::LNA_HIGH_SENSITIVITY_MODE);
 	puts("SetLNAGainSetting done");
-	Radio.SetTxParams(0, SX128x::RADIO_RAMP_20_US);
+	Radio.SetTxParams(power, SX128x::RADIO_RAMP_20_US);
 	puts("SetTxParams done");
 
 	Radio.SetBufferBaseAddresses(0x00, 0x00);
