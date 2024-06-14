@@ -16,7 +16,7 @@ include(${CPM_DOWNLOAD_LOCATION})
 CPMAddPackage(
         NAME sx128x_driver
         GITHUB_REPOSITORY pete4radio/sx128x_driver
-	VERSION 1.0.1
+	VERSION 1.0.2
 )
 
 CPMAddPackage(

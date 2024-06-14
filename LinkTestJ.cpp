@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 	std::cout << "after assignment" << std::endl;
 
 	const char * mode = jr["Radio"][0]["Mode"].get<std::string>().c_str();
-    std::cout << "Mode: [lora | flrc]" << mode << std::endl;
+    std::cout << "Mode [lora | flrc]: " << mode << std::endl;
 
 	int32_t freq = jr["Radio"][1]["Freq"];
     std::cout << "Frequency [2427 (MHz)]: " << freq << std::endl;
