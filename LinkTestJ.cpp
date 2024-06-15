@@ -80,9 +80,8 @@ int main(int argc, char **argv) {
 
 	int32_t power = jr["Radio"][2]["Power"];
     std::cout << "Transmit Power [-18 to 13 (dBm)]: " << power << std::endl;
-	power = power + 18;
-	if (power >= 31) power = 31;
-	if (power <= 0) power = 0;
+	if (power >= 13) {power = 13; std::cout << "Max power is 13 dBm"<< std::endl;}
+	if (power <= -18) {power = -18; std::cout << "Min power is -18 dBm" << std::endl;}
 
 	int32_t BW = jr["Radio"][3]["BW"];
     std::cout << "Bandwidth: " << BW << std::endl;
